@@ -1,0 +1,1029 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{rsetup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE)
+```
+```{r message=FALSE, warning=FALSE}
+library(baseballr)
+library(kableExtra)
+library(ggplot2)
+library(tidyverse)
+```
+
+```{r}
+PitcherData=scrape_statcast_savant_pitcher_all("2019-04-01", "2019-05-27")
+```
+```{r}
+Williams=scrape_statcast_savant_pitcher_all("2019-04-01","2019-09-30", playerid=592866)
+Musgrove=scrape_statcast_savant_pitcher_all("2019-04-01","2019-09-30", playerid=605397)
+Archer=scrape_statcast_savant_pitcher_all("2019-04-01","2019-09-30", playerid=502042)
+Brault=scrape_statcast_savant_pitcher_all("2019-04-01","2019-09-30", playerid=643230)
+Keller=scrape_statcast_savant_pitcher_all("2019-04-01","2019-09-30", playerid=656605)
+```
+
+```{r}
+Williams2019=Williams[,c(1,3,57,79)]
+Musgrove2019=Musgrove[,c(1,3,57,79)]
+Archer2019=Archer[,c(1,3,57,79)]
+Brault2019=Brault[,c(1,3,57,79)]
+Keller2019=Keller[,c(1,3,57,79)]
+```
+
+```{r}
+head(Williams2019)
+Williams2019=na.omit(Williams2019)
+unique(Williams2019$pitch_type)
+unique(Williams2019$pitch_name)
+```
+```{r}
+Williams2019SI=Williams2019 %>%filter(pitch_type=="SI")
+WilliamsmeanSISpin=round(mean(Williams2019SI$release_spin_rate),2)
+WilliamsmeanSIRel=round(mean(Williams2019SI$release_speed),2)
+WilliamsmeanSISpin
+WilliamsmeanSIRel
+
+Williams2019FF=Williams2019 %>%filter(pitch_type=="FF")
+WilliamsmeanFFSpin=round(mean(Williams2019FF$release_spin_rate),2)
+WilliamsmeanFFRel=round(mean(Williams2019FF$release_speed),2)
+WilliamsmeanFFSpin
+WilliamsmeanFFRel
+
+Williams2019SL=Williams2019 %>%filter(pitch_type=="SL")
+WilliamsmeanSLSpin=round(mean(Williams2019SL$release_spin_rate),2)
+WilliamsmeanSLRel=round(mean(Williams2019SL$release_speed),2)
+WilliamsmeanSLSpin
+WilliamsmeanSLRel
+
+Williams2019CU=Williams2019 %>%filter(pitch_type=="CU")
+WilliamsmeanCUSpin=round(mean(Williams2019CU$release_spin_rate),2)
+WilliamsmeanCURel=round(mean(Williams2019CU$release_speed),2)
+WilliamsmeanCUSpin
+WilliamsmeanCURel
+
+Williams2019CH=Williams2019 %>%filter(pitch_type=="CH")
+WilliamsmeanCHSpin=round(mean(Williams2019CH$release_spin_rate),2)
+WilliamsmeanCHRel=round(mean(Williams2019CH$release_speed),2)
+WilliamsmeanCHSpin
+WilliamsmeanCHRel
+```
+
+```{r}
+pitchesWilliams=c(unique(Williams2019$pitch_type))
+pitchesWilliams
+
+spinsWilliams=c(WilliamsmeanSISpin, WilliamsmeanFFSpin,WilliamsmeanSLSpin,WilliamsmeanCUSpin,WilliamsmeanCHSpin)
+spinsWilliams
+
+ReleaseSpeedWilliams=c(WilliamsmeanSIRel, WilliamsmeanFFRel, WilliamsmeanSLRel, WilliamsmeanCURel,WilliamsmeanCHRel)
+ReleaseSpeedWilliams
+
+table1Williams<-data.frame(pitchesWilliams,spinsWilliams,ReleaseSpeedWilliams)
+table1Williams
+```
+
+```{r}
+ggplot(data = table1Williams, aes(x=pitchesWilliams, y=spinsWilliams, fill = ReleaseSpeedWilliams)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = pitchesWilliams, y = spinsWilliams, label = spinsWilliams), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 4) +
+  xlab("Pitch Type") + 
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Trevor Williams Avg. Spin Rate and Release Speed by Pitch Type (2019)") + 
+  coord_cartesian(ylim = c(0, 3200))
+  ggsave("TrevorWilliams.png")
+```
+```{r}
+head(Musgrove2019)
+Musgrove2019=na.omit(Musgrove2019)
+unique(Musgrove2019$pitch_type)
+unique(Musgrove2019$pitch_name)
+```
+```{r}
+Musgrove2019CU=Musgrove2019 %>%filter(pitch_type=="CU")
+MusgrovemeanCUSpin=round(mean(Musgrove2019CU$release_spin_rate),2)
+MusgrovemeanCURel=round(mean(Musgrove2019CU$release_speed),2)
+MusgrovemeanCUSpin
+MusgrovemeanCURel
+
+Musgrove2019FF=Musgrove2019 %>%filter(pitch_type=="FF")
+MusgrovemeanFFSpin=round(mean(Musgrove2019FF$release_spin_rate),2)
+MusgrovemeanFFRel=round(mean(Musgrove2019FF$release_speed),2)
+MusgrovemeanFFSpin
+MusgrovemeanFFRel
+
+Musgrove2019SI=Musgrove2019 %>%filter(pitch_type=="SI")
+MusgrovemeanSISpin=round(mean(Musgrove2019SI$release_spin_rate),2)
+MusgrovemeanSIRel=round(mean(Musgrove2019SI$release_speed),2)
+MusgrovemeanSISpin
+MusgrovemeanSIRel
+
+Musgrove2019SL=Musgrove2019 %>%filter(pitch_type=="SL")
+MusgrovemeanSLSpin=round(mean(Musgrove2019SL$release_spin_rate),2)
+MusgrovemeanSLRel=round(mean(Musgrove2019SL$release_speed),2)
+MusgrovemeanSLSpin
+MusgrovemeanSLRel
+
+Musgrove2019CH=Musgrove2019 %>%filter(pitch_type=="CH")
+MusgrovemeanCHSpin=round(mean(Musgrove2019CH$release_spin_rate),2)
+MusgrovemeanCHRel=round(mean(Musgrove2019CH$release_speed),2)
+MusgrovemeanCHSpin
+MusgrovemeanCHRel
+
+Musgrove2019FC=Musgrove2019 %>%filter(pitch_type=="FC")
+MusgrovemeanFCSpin=round(mean(Musgrove2019FC$release_spin_rate),2)
+MusgrovemeanFCRel=round(mean(Musgrove2019FC$release_speed),2)
+MusgrovemeanFCSpin
+MusgrovemeanFCRel
+```
+```{r}
+pitchesMusgrove=c(unique(Musgrove2019$pitch_type))
+pitchesMusgrove
+
+spinsMusgrove=c(MusgrovemeanCUSpin, MusgrovemeanFFSpin,MusgrovemeanSISpin,MusgrovemeanSLSpin,MusgrovemeanCHSpin, MusgrovemeanFCSpin)
+spinsMusgrove
+
+ReleaseSpeedMusgrove=c(MusgrovemeanCURel, MusgrovemeanFFRel, MusgrovemeanSIRel, MusgrovemeanSLRel,MusgrovemeanCHRel, MusgrovemeanFCRel)
+ReleaseSpeedMusgrove
+
+table1Musgrove<-data.frame(pitchesMusgrove,spinsMusgrove,ReleaseSpeedMusgrove)
+table1Musgrove
+```
+```{r}
+ggplot(data = table1Musgrove, aes(x=pitchesMusgrove, y=spinsMusgrove, fill = ReleaseSpeedMusgrove)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = pitchesMusgrove, y = spinsMusgrove, label = spinsMusgrove), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 4) +
+  xlab("Pitch Type") + 
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Joe Musgrove Avg. Spin Rate and Release Speed by Pitch Type (2019)") + 
+  coord_cartesian(ylim = c(0, 3200))
+  ggsave("JoeMusgrove.png")
+```
+```{r}
+head(Archer2019)
+Archer2019=na.omit(Archer2019)
+unique(Archer2019$pitch_type)
+unique(Archer2019$pitch_name)
+```
+
+```{r}
+Archer2019SL=Archer2019 %>%filter(pitch_type=="SL")
+ArchermeanSLSpin=round(mean(Archer2019SL$release_spin_rate),2)
+ArchermeanSLRel=round(mean(Archer2019SL$release_speed),2)
+ArchermeanSLSpin
+ArchermeanSLRel
+
+Archer2019FF=Archer2019 %>%filter(pitch_type=="FF")
+ArchermeanFFSpin=round(mean(Archer2019FF$release_spin_rate),2)
+ArchermeanFFRel=round(mean(Archer2019FF$release_speed),2)
+ArchermeanFFSpin
+ArchermeanFFRel
+
+Archer2019CH=Archer2019 %>%filter(pitch_type=="CH")
+ArchermeanCHSpin=round(mean(Archer2019CH$release_spin_rate),2)
+ArchermeanCHRel=round(mean(Archer2019CH$release_speed),2)
+ArchermeanCHSpin
+ArchermeanCHRel
+
+Archer2019CU=Archer2019 %>%filter(pitch_type=="CU")
+ArchermeanCUSpin=round(mean(Archer2019CU$release_spin_rate),2)
+ArchermeanCURel=round(mean(Archer2019CU$release_speed),2)
+ArchermeanCUSpin
+ArchermeanCURel
+
+Archer2019FT=Archer2019 %>%filter(pitch_type=="FT")
+ArchermeanFTSpin=round(mean(Archer2019FT$release_spin_rate),2)
+ArchermeanFTRel=round(mean(Archer2019FT$release_speed),2)
+ArchermeanFTSpin
+ArchermeanFTRel
+```
+
+```{r}
+pitchesArcher=c(unique(Archer2019$pitch_type))
+pitchesArcher
+
+spinsArcher=c(ArchermeanSLSpin, ArchermeanFFSpin,ArchermeanCHSpin,ArchermeanCUSpin,ArchermeanFTSpin)
+spinsArcher
+
+ReleaseSpeedArcher=c(ArchermeanSLRel, ArchermeanFFRel, ArchermeanCHRel, ArchermeanCURel,ArchermeanFTRel)
+ReleaseSpeedArcher
+
+table1Archer<-data.frame(pitchesArcher,spinsArcher,ReleaseSpeedArcher)
+table1Archer
+```
+
+```{r}
+ggplot(data = table1Archer, aes(x=pitchesArcher, y=spinsArcher, fill = ReleaseSpeedArcher)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = pitchesArcher, y = spinsArcher, label = spinsArcher), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 4) +
+  xlab("Pitch Type") + 
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Chris Archer Avg. Spin Rate and Release Speed by Pitch Type (2019)") + 
+  coord_cartesian(ylim = c(0, 3200))
+  ggsave("ChrisArcher.png")
+```
+
+```{r}
+head(Brault2019)
+Brault2019=na.omit(Brault2019)
+unique(Brault2019$pitch_type)
+unique(Brault2019$pitch_name)
+```
+
+```{r}
+Brault2019SL=Brault2019 %>%filter(pitch_type=="SL")
+BraultmeanSLSpin=round(mean(Brault2019SL$release_spin_rate),2)
+BraultmeanSLRel=round(mean(Brault2019SL$release_speed),2)
+BraultmeanSLSpin
+BraultmeanSLRel
+
+Brault2019FF=Brault2019 %>%filter(pitch_type=="FF")
+BraultmeanFFSpin=round(mean(Brault2019FF$release_spin_rate),2)
+BraultmeanFFRel=round(mean(Brault2019FF$release_speed),2)
+BraultmeanFFSpin
+BraultmeanFFRel
+
+Brault2019FC=Brault2019 %>%filter(pitch_type=="FC")
+BraultmeanFCSpin=round(mean(Brault2019FC$release_spin_rate),2)
+BraultmeanFCRel=round(mean(Brault2019FC$release_speed),2)
+BraultmeanFCSpin
+BraultmeanFCRel
+
+Brault2019CH=Brault2019 %>%filter(pitch_type=="CH")
+BraultmeanCHSpin=round(mean(Brault2019CH$release_spin_rate),2)
+BraultmeanCHRel=round(mean(Brault2019CH$release_speed),2)
+BraultmeanCHSpin
+BraultmeanCHRel
+
+Brault2019FT=Brault2019 %>%filter(pitch_type=="FT")
+BraultmeanFTSpin=round(mean(Brault2019FT$release_spin_rate),2)
+BraultmeanFTRel=round(mean(Brault2019FT$release_speed),2)
+BraultmeanFTSpin
+BraultmeanFTRel
+
+Brault2019CU=Brault2019 %>%filter(pitch_type=="CU")
+BraultmeanCUSpin=round(mean(Brault2019CU$release_spin_rate),2)
+BraultmeanCURel=round(mean(Brault2019CU$release_speed),2)
+BraultmeanCUSpin
+BraultmeanCURel
+```
+
+```{r}
+pitchesBrault=c(unique(Brault2019$pitch_type))
+pitchesBrault
+
+spinsBrault=c(BraultmeanSLSpin, BraultmeanFFSpin,BraultmeanFCSpin,BraultmeanCHSpin,BraultmeanFTSpin,BraultmeanCUSpin)
+spinsBrault
+
+ReleaseSpeedBrault=c(BraultmeanSLRel, BraultmeanFFRel, BraultmeanFCRel, BraultmeanCHRel,BraultmeanFTRel,BraultmeanCURel)
+ReleaseSpeedBrault
+
+table1Brault<-data.frame(pitchesBrault,spinsBrault,ReleaseSpeedBrault)
+table1Brault
+```
+
+```{r}
+ggplot(data = table1Brault, aes(x=pitchesBrault, y=spinsBrault, fill = ReleaseSpeedBrault)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = pitchesBrault, y = spinsBrault, label = spinsBrault), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 4) +
+  xlab("Pitch Type") + 
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Steven Brault Avg. Spin Rate and Release Speed by Pitch Type (2019)") + 
+  coord_cartesian(ylim = c(0, 3200))
+  ggsave("StevenBrault.png")
+```
+```{r}
+head(Keller2019)
+Keller2019=na.omit(Keller2019)
+unique(Keller2019$pitch_type)
+unique(Keller2019$pitch_name)
+```
+```{r}
+Keller2019FF=Keller2019 %>%filter(pitch_type=="FF")
+KellermeanFFSpin=round(mean(Keller2019FF$release_spin_rate),2)
+KellermeanFFRel=round(mean(Keller2019FF$release_speed),2)
+KellermeanFFSpin
+KellermeanFFRel
+
+Keller2019SL=Keller2019 %>%filter(pitch_type=="SL")
+KellermeanSLSpin=round(mean(Keller2019SL$release_spin_rate),2)
+KellermeanSLRel=round(mean(Keller2019SL$release_speed),2)
+KellermeanSLSpin
+KellermeanSLRel
+
+Keller2019CU=Keller2019 %>%filter(pitch_type=="CU")
+KellermeanCUSpin=round(mean(Keller2019CU$release_spin_rate),2)
+KellermeanCURel=round(mean(Keller2019CU$release_speed),2)
+KellermeanCUSpin
+KellermeanCURel
+
+Keller2019CH=Keller2019 %>%filter(pitch_type=="CH")
+KellermeanCHSpin=round(mean(Keller2019CH$release_spin_rate),2)
+KellermeanCHRel=round(mean(Keller2019CH$release_speed),2)
+KellermeanCHSpin
+KellermeanCHRel
+```
+```{r}
+pitchesKeller=c(unique(Keller2019$pitch_type))
+pitchesKeller
+
+spinsKeller=c(KellermeanFFSpin, KellermeanSLSpin,KellermeanCUSpin,KellermeanCHSpin)
+spinsKeller
+
+ReleaseSpeedKeller=c(KellermeanFFRel, KellermeanSLRel, KellermeanCURel, KellermeanCHRel)
+ReleaseSpeedKeller
+
+table1Keller<-data.frame(pitchesKeller,spinsKeller,ReleaseSpeedKeller)
+table1Keller
+```
+```{r}
+ggplot(data = table1Keller, aes(x=pitchesKeller, y=spinsKeller, fill = ReleaseSpeedKeller)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = pitchesKeller, y = spinsKeller, label = spinsKeller), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 4) +
+  xlab("Pitch Type") + 
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Mitch Keller Avg. Spin Rate and Release Speed by Pitch Type (2019)") + 
+  coord_cartesian(ylim = c(0, 3200))
+  ggsave("MitchKeller.png")
+```
+
+
+
+```{r}
+PiratesPitchers=rbind(Williams, Musgrove, Archer, Brault, Keller)
+PiratesPitchers
+```
+```{r}
+PiratesPitcherNames=c(unique(PiratesPitchers$player_name))
+PiratesPitcherNames
+
+Sliderspins=c(WilliamsmeanSLSpin, MusgrovemeanSLSpin,ArchermeanSLSpin,BraultmeanSLSpin, KellermeanSLSpin)
+Sliderspins
+
+SliderReleaseSpeed=c(WilliamsmeanSLRel, MusgrovemeanSLRel, ArchermeanSLRel, BraultmeanSLRel, KellermeanSLRel)
+SliderReleaseSpeed
+
+table1Sliders<-data.frame(PiratesPitcherNames,Sliderspins,SliderReleaseSpeed)
+table1Sliders
+
+ggplot(data = table1Sliders, aes(x=PiratesPitcherNames, y=Sliderspins, fill = SliderReleaseSpeed)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = PiratesPitcherNames, y = Sliderspins, label = Sliderspins), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 4) +
+  xlab("Player Name") + 
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Pirates Pitchers Avg. Spin Rate and Release Speed for Sliders (2019)") + 
+  coord_cartesian(ylim = c(0, 3200)) +
+  geom_abline(slope=0, intercept=2400,  col = "red",lty=2)+
+  geom_abline(slope=0, intercept=2500,  col = "red",lty=2)
+  ggsave("PiratesSliders.png")
+
+FourseamFastballspins=c(WilliamsmeanFFSpin, MusgrovemeanFFSpin,ArchermeanFFSpin,BraultmeanFFSpin, KellermeanFFSpin)
+FourseamFastballspins
+
+FourseamFastballReleaseSpeed=c(WilliamsmeanFFRel, MusgrovemeanFFRel, ArchermeanFFRel, BraultmeanFFRel, KellermeanFFRel)
+FourseamFastballReleaseSpeed
+
+table1FourseamFastball<-data.frame(PiratesPitcherNames,FourseamFastballspins,FourseamFastballReleaseSpeed)
+table1FourseamFastball
+
+ggplot(data = table1FourseamFastball, aes(x=PiratesPitcherNames, y=FourseamFastballspins, fill = FourseamFastballReleaseSpeed)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = PiratesPitcherNames, y = FourseamFastballspins, label = FourseamFastballspins), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 4) +
+  xlab("Player Name") + 
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Pirates Pitchers Avg. Spin Rate and Release Speed for 4-Seam Fastballs (2019)") + 
+  coord_cartesian(ylim = c(0, 3200)) +
+  geom_abline(slope=0, intercept=2250,  col = "red",lty=2)+
+  geom_abline(slope=0, intercept=2350,  col = "red",lty=2)
+  ggsave("Pirates4seam.png")
+
+
+CutterPitchers=rbind(Musgrove,Brault)
+PiratesCutterPitchers=c(unique(CutterPitchers$player_name))
+
+Cutterspins=c(MusgrovemeanFCSpin,BraultmeanFCSpin)
+Cutterspins
+
+CutterReleaseSpeed=c(MusgrovemeanFCRel, BraultmeanFCRel)
+CutterReleaseSpeed
+
+table1Cutter<-data.frame(PiratesCutterPitchers,Cutterspins,CutterReleaseSpeed)
+table1Cutter
+
+ggplot(data = table1Cutter, aes(x=PiratesCutterPitchers, y=Cutterspins, fill = CutterReleaseSpeed)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = PiratesCutterPitchers, y = Cutterspins, label = Cutterspins), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 4) +
+  xlab("Player Name") + 
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Pirates Pitchers Avg. Spin Rate and Release Speed for Cutters (2019)") + 
+  coord_cartesian(ylim = c(0, 3200))+
+  geom_abline(slope=0, intercept=2350,  col = "red",lty=2)+
+  geom_abline(slope=0, intercept=2450,  col = "red",lty=2)
+  ggsave("PiratesCutters.png")
+
+Changeupspins=c(WilliamsmeanCHSpin, MusgrovemeanCHSpin,ArchermeanCHSpin,BraultmeanCHSpin, KellermeanCHSpin)
+Changeupspins
+
+ChangeupReleaseSpeed=c(WilliamsmeanCHRel, MusgrovemeanCHRel, ArchermeanCHRel, BraultmeanCHRel, KellermeanCHRel)
+ChangeupReleaseSpeed
+
+table1Changeup<-data.frame(PiratesPitcherNames,Changeupspins,ChangeupReleaseSpeed)
+table1Changeup
+
+ggplot(data = table1Changeup, aes(x=PiratesPitcherNames, y=Changeupspins, fill = ChangeupReleaseSpeed)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = PiratesPitcherNames, y = Changeupspins, label = Changeupspins), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 4) +
+  xlab("Player Name") + 
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Pirates Pitchers Avg. Spin Rate and Release Speed for Changeups (2019)") + 
+  coord_cartesian(ylim = c(0, 3200))+
+  geom_abline(slope=0, intercept=1700,  col = "red",lty=2)+
+  geom_abline(slope=0, intercept=1800,  col = "red",lty=2)
+  ggsave("PiratesChangeups.png")
+
+Curveballspins=c(WilliamsmeanCUSpin, MusgrovemeanCUSpin,ArchermeanCUSpin,BraultmeanCUSpin, KellermeanCUSpin)
+Curveballspins
+
+CurveballReleaseSpeed=c(WilliamsmeanCURel, MusgrovemeanCURel, ArchermeanCURel, BraultmeanCURel, KellermeanCURel)
+CurveballReleaseSpeed
+
+table1Curveball<-data.frame(PiratesPitcherNames,Curveballspins,CurveballReleaseSpeed)
+table1Curveball
+
+ggplot(data = table1Curveball, aes(x=PiratesPitcherNames, y=Curveballspins, fill = CurveballReleaseSpeed)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = PiratesPitcherNames, y = Curveballspins, label = Curveballspins), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 4) +
+  xlab("Player Name") + 
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Pirates Pitchers Avg. Spin Rate and Release Speed for Curveballs (2019)") + 
+  coord_cartesian(ylim = c(0, 3200))+
+  geom_abline(slope=0, intercept=2500,  col = "red",lty=2)+
+  geom_abline(slope=0, intercept=2600,  col = "red",lty=2)
+  ggsave("PiratesCurveballs.png")
+
+
+TwoSeamPitchers=rbind(Archer,Brault)
+PiratesTwoSeamPitchers=c(unique(TwoSeamPitchers$player_name))
+
+
+TwoseamFastballspins=c(ArchermeanFTSpin,BraultmeanFTSpin)
+TwoseamFastballspins
+
+TwoseamFastballReleaseSpeed=c(ArchermeanFTRel, BraultmeanFTRel)
+TwoseamFastballReleaseSpeed
+
+table1TwoseamFastball<-data.frame(PiratesTwoSeamPitchers,TwoseamFastballspins,TwoseamFastballReleaseSpeed)
+table1TwoseamFastball
+
+ggplot(data = table1TwoseamFastball, aes(x=PiratesTwoSeamPitchers, y=TwoseamFastballspins, fill = TwoseamFastballReleaseSpeed)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = PiratesTwoSeamPitchers, y = TwoseamFastballspins, label = TwoseamFastballspins), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 4) +
+  xlab("Player Name") + 
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Pirates Pitchers Avg. Spin Rate and Release Speed for 2-Seam Fastballs (2019)") + 
+  coord_cartesian(ylim = c(0, 3200))+
+  geom_abline(slope=0, intercept=2150,  col = "red",lty=2)+
+  geom_abline(slope=0, intercept=2200,  col = "red",lty=2)
+  ggsave("Pirates2seam.png")
+
+
+SinkerPitchers=rbind(Williams, Musgrove)
+PiratesSinkerPitchers=c(unique(SinkerPitchers$player_name))
+
+Sinkerspins=c(WilliamsmeanSISpin,MusgrovemeanSISpin)
+Sinkerspins
+
+SinkerReleaseSpeed=c(WilliamsmeanSIRel, MusgrovemeanSIRel)
+SinkerReleaseSpeed
+
+table1Sinker<-data.frame(PiratesSinkerPitchers,Sinkerspins,SinkerReleaseSpeed)
+table1Sinker
+
+ggplot(data = table1Sinker, aes(x=PiratesSinkerPitchers, y=Sinkerspins, fill = SinkerReleaseSpeed)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = PiratesSinkerPitchers, y = Sinkerspins, label = Sinkerspins), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 4) +
+  xlab("Player Name") + 
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Pirates Pitchers Avg. Spin Rate and Release Speed for Sinkers (2019)") + 
+  coord_cartesian(ylim = c(0, 3200))+
+  geom_abline(slope=0, intercept=2100,  col = "red",lty=2)+
+  geom_abline(slope=0, intercept=2150,  col = "red",lty=2)
+  ggsave("PiratesSinkers.png")
+  
+
+```
+
+```{r}
+Cole=scrape_statcast_savant_pitcher_all("2019-04-01","2019-09-30", playerid=543037)
+Strasburg=scrape_statcast_savant_pitcher_all("2019-04-01","2019-09-30", playerid=544931)
+Wheeler=scrape_statcast_savant_pitcher_all("2019-04-01","2019-09-30", playerid=554430)
+Bumgarner=scrape_statcast_savant_pitcher_all("2019-04-01","2019-09-30", playerid=518516)
+Ryu=scrape_statcast_savant_pitcher_all("2019-04-01","2019-09-30", playerid=547943)
+```
+
+```{r}
+Cole2019=Cole[,c(1,3,57,79)]
+Strasburg2019=Strasburg[,c(1,3,57,79)]
+Wheeler2019=Wheeler[,c(1,3,57,79)]
+Bumgarner2019=Bumgarner[,c(1,3,57,79)]
+Ryu2019=Ryu[,c(1,3,57,79)]
+```
+
+```{r}
+head(Cole2019)
+Cole2019=na.omit(Cole2019)
+unique(Cole2019$pitch_type)
+unique(Cole2019$pitch_name)
+```
+
+```{r}
+Cole2019FF=Cole2019 %>%filter(pitch_type=="FF")
+ColemeanFFSpin=round(mean(Cole2019FF$release_spin_rate),2)
+ColemeanFFRel=round(mean(Cole2019FF$release_speed),2)
+ColemeanFFSpin
+ColemeanFFRel
+
+Cole2019KC=Cole2019 %>%filter(pitch_type=="KC")
+ColemeanKCSpin=round(mean(Cole2019KC$release_spin_rate),2)
+ColemeanKCRel=round(mean(Cole2019KC$release_speed),2)
+ColemeanKCSpin
+ColemeanKCRel
+
+Cole2019CH=Cole2019 %>%filter(pitch_type=="CH")
+ColemeanCHSpin=round(mean(Cole2019CH$release_spin_rate),2)
+ColemeanCHRel=round(mean(Cole2019CH$release_speed),2)
+ColemeanCHSpin
+ColemeanCHRel
+
+Cole2019SL=Cole2019 %>%filter(pitch_type=="SL")
+ColemeanSLSpin=round(mean(Cole2019SL$release_spin_rate),2)
+ColemeanSLRel=round(mean(Cole2019SL$release_speed),2)
+ColemeanSLSpin
+ColemeanSLRel
+
+Cole2019FT=Cole2019 %>%filter(pitch_type=="FT")
+ColemeanFTSpin=round(mean(Cole2019FT$release_spin_rate),2)
+ColemeanFTRel=round(mean(Cole2019FT$release_speed),2)
+ColemeanFTSpin
+ColemeanFTRel
+```
+
+```{r}
+pitchesCole=c(unique(Cole2019$pitch_type))
+pitchesCole
+
+spinsCole=c(ColemeanFFSpin, ColemeanKCSpin,ColemeanCHSpin,ColemeanSLSpin, ColemeanFTSpin)
+spinsCole
+
+ReleaseSpeedCole=c(ColemeanFFRel, ColemeanKCRel, ColemeanCHRel, ColemeanSLRel, ColemeanFTRel)
+ReleaseSpeedCole
+
+table1Cole<-data.frame(pitchesCole,spinsCole,ReleaseSpeedCole)
+table1Cole
+
+ggplot(data = table1Cole, aes(x=pitchesCole, y=spinsCole, fill = ReleaseSpeedCole)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = pitchesCole, y = spinsCole, label = spinsCole), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 4) +
+  xlab("Pitch Type") + 
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Gerrit Cole Avg. Spin Rate and Release Speed by Pitch Type (2019)") + 
+  coord_cartesian(ylim = c(0, 3200))
+  ggsave("GerritCole.png")
+```
+
+```{r}
+head(Strasburg2019)
+Strasburg2019=na.omit(Strasburg2019)
+unique(Strasburg2019$pitch_type)
+unique(Strasburg2019$pitch_name)
+```
+
+```{r}
+Strasburg2019CH=Strasburg2019 %>%filter(pitch_type=="CH")
+StrasburgmeanCHSpin=round(mean(Strasburg2019CH$release_spin_rate),2)
+StrasburgmeanCHRel=round(mean(Strasburg2019CH$release_speed),2)
+StrasburgmeanCHSpin
+StrasburgmeanCHRel
+
+Strasburg2019FT=Strasburg2019 %>%filter(pitch_type=="FT")
+StrasburgmeanFTSpin=round(mean(Strasburg2019FT$release_spin_rate),2)
+StrasburgmeanFTRel=round(mean(Strasburg2019FT$release_speed),2)
+StrasburgmeanFTSpin
+StrasburgmeanFTRel
+
+Strasburg2019FF=Strasburg2019 %>%filter(pitch_type=="FF")
+StrasburgmeanFFSpin=round(mean(Strasburg2019FF$release_spin_rate),2)
+StrasburgmeanFFRel=round(mean(Strasburg2019FF$release_speed),2)
+StrasburgmeanFFSpin
+StrasburgmeanFFRel
+
+Strasburg2019CU=Strasburg2019 %>%filter(pitch_type=="CU")
+StrasburgmeanCUSpin=round(mean(Strasburg2019CU$release_spin_rate),2)
+StrasburgmeanCURel=round(mean(Strasburg2019CU$release_speed),2)
+StrasburgmeanCUSpin
+StrasburgmeanCURel
+
+Strasburg2019SL=Strasburg2019 %>%filter(pitch_type=="SL")
+StrasburgmeanSLSpin=round(mean(Strasburg2019SL$release_spin_rate),2)
+StrasburgmeanSLRel=round(mean(Strasburg2019SL$release_speed),2)
+StrasburgmeanSLSpin
+StrasburgmeanSLRel
+```
+
+```{r}
+pitchesStrasburg=c(unique(Strasburg2019$pitch_type))
+pitchesStrasburg
+
+spinsStrasburg=c(StrasburgmeanCHSpin, StrasburgmeanFTSpin,StrasburgmeanFFSpin,StrasburgmeanCUSpin, StrasburgmeanSLSpin)
+spinsStrasburg
+
+ReleaseSpeedStrasburg=c(StrasburgmeanCHRel, StrasburgmeanFTRel, StrasburgmeanFFRel, StrasburgmeanCURel, StrasburgmeanSLRel)
+ReleaseSpeedStrasburg
+
+table1Strasburg<-data.frame(pitchesStrasburg,spinsStrasburg,ReleaseSpeedStrasburg)
+table1Strasburg
+
+ggplot(data = table1Strasburg, aes(x=pitchesStrasburg, y=spinsStrasburg, fill = ReleaseSpeedStrasburg)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = pitchesStrasburg, y = spinsStrasburg, label = spinsStrasburg), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 4) +
+  xlab("Pitch Type") + 
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Stephen Strasburg Avg. Spin Rate and Release Speed by Pitch Type (2019)") + 
+  coord_cartesian(ylim = c(0, 3200))
+  ggsave("StephenStrasburg.png")
+```
+
+```{r}
+head(Wheeler2019)
+Wheeler2019=na.omit(Wheeler2019)
+unique(Wheeler2019$pitch_type)
+unique(Wheeler2019$pitch_name)
+```
+
+```{r}
+Wheeler2019CU=Wheeler2019 %>%filter(pitch_type=="CU")
+WheelermeanCUSpin=round(mean(Wheeler2019CU$release_spin_rate),2)
+WheelermeanCURel=round(mean(Wheeler2019CU$release_speed),2)
+WheelermeanCUSpin
+WheelermeanCURel
+
+Wheeler2019FF=Wheeler2019 %>%filter(pitch_type=="FF")
+WheelermeanFFSpin=round(mean(Wheeler2019FF$release_spin_rate),2)
+WheelermeanFFRel=round(mean(Wheeler2019FF$release_speed),2)
+WheelermeanFFSpin
+WheelermeanFFRel
+
+Wheeler2019SL=Wheeler2019 %>%filter(pitch_type=="SL")
+WheelermeanSLSpin=round(mean(Wheeler2019SL$release_spin_rate),2)
+WheelermeanSLRel=round(mean(Wheeler2019SL$release_speed),2)
+WheelermeanSLSpin
+WheelermeanSLRel
+
+Wheeler2019FT=Wheeler2019 %>%filter(pitch_type=="FT")
+WheelermeanFTSpin=round(mean(Wheeler2019FT$release_spin_rate),2)
+WheelermeanFTRel=round(mean(Wheeler2019FT$release_speed),2)
+WheelermeanFTSpin
+WheelermeanFTRel
+
+Wheeler2019CH=Wheeler2019 %>%filter(pitch_type=="CH")
+WheelermeanCHSpin=round(mean(Wheeler2019CH$release_spin_rate),2)
+WheelermeanCHRel=round(mean(Wheeler2019CH$release_speed),2)
+WheelermeanCHSpin
+WheelermeanCHRel
+
+Wheeler2019FS=Wheeler2019 %>%filter(pitch_type=="FS")
+WheelermeanFSSpin=round(mean(Wheeler2019FS$release_spin_rate),2)
+WheelermeanFSRel=round(mean(Wheeler2019FS$release_speed),2)
+WheelermeanFSSpin
+WheelermeanFSRel
+```
+
+```{r}
+pitchesWheeler=c(unique(Wheeler2019$pitch_type))
+pitchesWheeler
+
+spinsWheeler=c(WheelermeanCUSpin, WheelermeanFFSpin,WheelermeanSLSpin,WheelermeanFTSpin, WheelermeanCHSpin, WheelermeanFSSpin)
+spinsWheeler
+
+ReleaseSpeedWheeler=c(WheelermeanCURel, WheelermeanFFRel, WheelermeanSLRel, WheelermeanFTRel, WheelermeanCHRel, WheelermeanFSRel)
+ReleaseSpeedWheeler
+
+table1Wheeler<-data.frame(pitchesWheeler,spinsWheeler,ReleaseSpeedWheeler)
+table1Wheeler
+
+ggplot(data = table1Wheeler, aes(x=pitchesWheeler, y=spinsWheeler, fill = ReleaseSpeedWheeler)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = pitchesWheeler, y = spinsWheeler, label = spinsWheeler), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 4) +
+  xlab("Pitch Type") + 
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Zack Wheeler Avg. Spin Rate and Release Speed by Pitch Type (2019)") + 
+  coord_cartesian(ylim = c(0, 3200))
+  ggsave("ZachWheeler.png")
+```
+
+```{r}
+head(Bumgarner2019)
+Bumgarner2019=na.omit(Bumgarner2019)
+unique(Bumgarner2019$pitch_type)
+unique(Bumgarner2019$pitch_name)
+```
+
+```{r}
+Bumgarner2019CU=Bumgarner2019 %>%filter(pitch_type=="CU")
+BumgarnermeanCUSpin=round(mean(Bumgarner2019CU$release_spin_rate),2)
+BumgarnermeanCURel=round(mean(Bumgarner2019CU$release_speed),2)
+BumgarnermeanCUSpin
+BumgarnermeanCURel
+
+Bumgarner2019FF=Bumgarner2019 %>%filter(pitch_type=="FF")
+BumgarnermeanFFSpin=round(mean(Bumgarner2019FF$release_spin_rate),2)
+BumgarnermeanFFRel=round(mean(Bumgarner2019FF$release_speed),2)
+BumgarnermeanFFSpin
+BumgarnermeanFFRel
+
+Bumgarner2019FC=Bumgarner2019 %>%filter(pitch_type=="FC")
+BumgarnermeanFCSpin=round(mean(Bumgarner2019FC$release_spin_rate),2)
+BumgarnermeanFCRel=round(mean(Bumgarner2019FC$release_speed),2)
+BumgarnermeanFCSpin
+BumgarnermeanFCRel
+
+Bumgarner2019CH=Bumgarner2019 %>%filter(pitch_type=="CH")
+BumgarnermeanCHSpin=round(mean(Bumgarner2019CH$release_spin_rate),2)
+BumgarnermeanCHRel=round(mean(Bumgarner2019CH$release_speed),2)
+BumgarnermeanCHSpin
+BumgarnermeanCHRel
+
+Bumgarner2019FT=Bumgarner2019 %>%filter(pitch_type=="FT")
+BumgarnermeanFTSpin=round(mean(Bumgarner2019FT$release_spin_rate),2)
+BumgarnermeanFTRel=round(mean(Bumgarner2019FT$release_speed),2)
+BumgarnermeanFTSpin
+BumgarnermeanFTRel
+```
+
+```{r}
+pitchesBumgarner=c(unique(Bumgarner2019$pitch_type))
+pitchesBumgarner
+
+spinsBumgarner=c(BumgarnermeanCUSpin, BumgarnermeanFFSpin,BumgarnermeanFCSpin,BumgarnermeanCHSpin, BumgarnermeanFTSpin)
+spinsBumgarner
+
+ReleaseSpeedBumgarner=c(BumgarnermeanCURel, BumgarnermeanFFRel, BumgarnermeanFCRel, BumgarnermeanCHRel, BumgarnermeanFTRel)
+ReleaseSpeedBumgarner
+
+table1Bumgarner<-data.frame(pitchesBumgarner,spinsBumgarner,ReleaseSpeedBumgarner)
+table1Bumgarner
+
+ggplot(data = table1Bumgarner, aes(x=pitchesBumgarner, y=spinsBumgarner, fill = ReleaseSpeedBumgarner)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = pitchesBumgarner, y = spinsBumgarner, label = spinsBumgarner), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 4) +
+  xlab("Pitch Type") + 
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Madison Bumgarner Avg. Spin Rate and Release Speed by Pitch Type (2019)") + 
+  coord_cartesian(ylim = c(0, 3200))
+  ggsave("MadisonBumgarner.png")
+```
+```{r}
+head(Ryu2019)
+Ryu2019=na.omit(Ryu2019)
+unique(Ryu2019$pitch_type)
+unique(Ryu2019$pitch_name)
+```
+
+```{r}
+Ryu2019CH=Ryu2019 %>%filter(pitch_type=="CH")
+RyumeanCHSpin=round(mean(Ryu2019CH$release_spin_rate),2)
+RyumeanCHRel=round(mean(Ryu2019CH$release_speed),2)
+RyumeanCHSpin
+RyumeanCHRel
+
+Ryu2019FF=Ryu2019 %>%filter(pitch_type=="FF")
+RyumeanFFSpin=round(mean(Ryu2019FF$release_spin_rate),2)
+RyumeanFFRel=round(mean(Ryu2019FF$release_speed),2)
+RyumeanFFSpin
+RyumeanFFRel
+
+Ryu2019FC=Ryu2019 %>%filter(pitch_type=="FC")
+RyumeanFCSpin=round(mean(Ryu2019FC$release_spin_rate),2)
+RyumeanFCRel=round(mean(Ryu2019FC$release_speed),2)
+RyumeanFCSpin
+RyumeanFCRel
+
+Ryu2019FT=Ryu2019 %>%filter(pitch_type=="FT")
+RyumeanFTSpin=round(mean(Ryu2019FT$release_spin_rate),2)
+RyumeanFTRel=round(mean(Ryu2019FT$release_speed),2)
+RyumeanFTSpin
+RyumeanFTRel
+
+Ryu2019CU=Ryu2019 %>%filter(pitch_type=="CU")
+RyumeanCUSpin=round(mean(Ryu2019CU$release_spin_rate),2)
+RyumeanCURel=round(mean(Ryu2019CU$release_speed),2)
+RyumeanCUSpin
+RyumeanCURel
+
+Ryu2019SL=Ryu2019 %>%filter(pitch_type=="SL")
+RyumeanSLSpin=round(mean(Ryu2019SL$release_spin_rate),2)
+RyumeanSLRel=round(mean(Ryu2019SL$release_speed),2)
+RyumeanSLSpin
+RyumeanSLRel
+```
+
+```{r}
+pitchesRyu=c(unique(Ryu2019$pitch_type))
+pitchesRyu
+
+spinsRyu=c(RyumeanCHSpin, RyumeanFFSpin,RyumeanFCSpin,RyumeanFTSpin, RyumeanCUSpin, RyumeanSLSpin)
+spinsRyu
+
+ReleaseSpeedRyu=c(RyumeanCHRel, RyumeanFFRel, RyumeanFCRel, RyumeanFTRel, RyumeanCURel, RyumeanSLRel)
+ReleaseSpeedRyu
+
+table1Ryu<-data.frame(pitchesRyu,spinsRyu,ReleaseSpeedRyu)
+table1Ryu
+
+ggplot(data = table1Ryu, aes(x=pitchesRyu, y=spinsRyu, fill = ReleaseSpeedRyu)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = pitchesRyu, y = spinsRyu, label = spinsRyu), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 4) +
+  xlab("Pitch Type") + 
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Hyun-Jin Ryu Avg. Spin Rate and Release Speed by Pitch Type (2019)") + 
+  coord_cartesian(ylim = c(0, 3200))
+  ggsave("Ryu.png")
+```
+
+```{r}
+AllPitchers=rbind(Williams, Musgrove, Archer, Brault, Keller, Cole, Strasburg, Wheeler, Bumgarner, Ryu)
+```
+
+```{r}
+AllPitcherNames=c(unique(AllPitchers$player_name))
+AllPitcherNames
+
+AllSliderPitchers=rbind(Williams, Musgrove, Archer, Brault, Keller, Cole, Strasburg, Wheeler, Ryu)
+AllSliderPitcherNames=c(unique(AllSliderPitchers$player_name))
+AllSliderspins=c(WilliamsmeanSLSpin, MusgrovemeanSLSpin,ArchermeanSLSpin,BraultmeanSLSpin, KellermeanSLSpin, ColemeanSLSpin, StrasburgmeanSLSpin, WheelermeanSLSpin, RyumeanSLSpin)
+AllSliderspins
+
+AllSliderReleaseSpeed=c(WilliamsmeanSLRel, MusgrovemeanSLRel, ArchermeanSLRel, BraultmeanSLRel, KellermeanSLRel, ColemeanSLRel, StrasburgmeanSLRel, WheelermeanSLRel, RyumeanSLRel)
+AllSliderReleaseSpeed
+
+tableAllSliders<-data.frame(AllSliderPitcherNames,AllSliderspins,AllSliderReleaseSpeed)
+tableAllSliders
+
+ggplot(data = tableAllSliders, aes(x=AllSliderPitcherNames, y=AllSliderspins, fill = AllSliderReleaseSpeed)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = AllSliderPitcherNames, y = AllSliderspins, label = AllSliderspins), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 3) +
+  xlab("Player Name") + 
+  theme(axis.text.x = element_text(angle = 90))+
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Pitchers Avg. Spin Rate and Release Speed for Sliders (2019)") + 
+  coord_cartesian(ylim = c(0, 3200))+
+  geom_abline(slope=0, intercept=2400,  col = "red",lty=2)+
+  geom_abline(slope=0, intercept=2500,  col = "red",lty=2)
+  ggsave("AllSliders.png")
+
+AllFourseamFastballspins=c(WilliamsmeanFFSpin, MusgrovemeanFFSpin,ArchermeanFFSpin,BraultmeanFFSpin, KellermeanFFSpin,ColemeanFFSpin, StrasburgmeanFFSpin, WheelermeanFFSpin, BumgarnermeanFFSpin, RyumeanFFSpin)
+AllFourseamFastballspins
+
+AllFourseamFastballReleaseSpeed=c(WilliamsmeanFFRel, MusgrovemeanFFRel, ArchermeanFFRel, BraultmeanFFRel, KellermeanFFRel, ColemeanFFRel, StrasburgmeanFFRel, WheelermeanFFRel, BumgarnermeanFFRel, RyumeanFFRel)
+AllFourseamFastballReleaseSpeed
+
+tableAllFourseamFastball<-data.frame(AllPitcherNames,AllFourseamFastballspins,AllFourseamFastballReleaseSpeed)
+tableAllFourseamFastball
+
+ggplot(data = tableAllFourseamFastball, aes(x=AllPitcherNames, y=AllFourseamFastballspins, fill = AllFourseamFastballReleaseSpeed)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x =AllPitcherNames, y = AllFourseamFastballspins, label = AllFourseamFastballspins), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 3) +
+  xlab("Player Name") + 
+  theme(axis.text.x = element_text(angle = 90))+
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Pitchers Avg. Spin Rate and Release Speed for 4-Seam Fastballs (2019)") + 
+  coord_cartesian(ylim = c(0, 3200))+
+  geom_abline(slope=0, intercept=2250,  col = "red",lty=2)+
+  geom_abline(slope=0, intercept=2350,  col = "red",lty=2)
+  
+ggsave("AllFourSeam.png")
+
+
+AllCutterPitchers=rbind(Musgrove,Brault, Bumgarner, Ryu)
+AllCutterPitcherNames=c(unique(AllCutterPitchers$player_name))
+
+AllCutterspins=c(MusgrovemeanFCSpin,BraultmeanFCSpin, BumgarnermeanFCSpin, RyumeanFCSpin)
+AllCutterspins
+
+AllCutterReleaseSpeed=c(MusgrovemeanFCRel, BraultmeanFCRel, BumgarnermeanFCRel, RyumeanFCRel)
+AllCutterReleaseSpeed
+
+tableAllCutter<-data.frame(AllCutterPitcherNames,AllCutterspins,AllCutterReleaseSpeed)
+tableAllCutter
+
+ggplot(data = tableAllCutter, aes(x=AllCutterPitcherNames, y=AllCutterspins, fill = AllCutterReleaseSpeed)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = AllCutterPitcherNames, y = AllCutterspins, label = AllCutterspins), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 4) +
+  xlab("Player Name") + 
+  theme(axis.text.x = element_text(angle = 90))+
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Pitchers Avg. Spin Rate and Release Speed for Cutters (2019)") + 
+  coord_cartesian(ylim = c(0, 3200))+
+  geom_abline(slope=0, intercept=2350,  col = "red",lty=2)+
+  geom_abline(slope=0, intercept=2450,  col = "red",lty=2)
+  ggsave("AllCutters.png")
+
+AllChangeupspins=c(WilliamsmeanCHSpin, MusgrovemeanCHSpin,ArchermeanCHSpin,BraultmeanCHSpin, KellermeanCHSpin, ColemeanCHSpin, StrasburgmeanCHSpin, WheelermeanCHSpin, BumgarnermeanCHSpin, RyumeanCHSpin)
+AllChangeupspins
+
+AllChangeupReleaseSpeed=c(WilliamsmeanCHRel, MusgrovemeanCHRel, ArchermeanCHRel, BraultmeanCHRel, KellermeanCHRel, ColemeanCHRel,StrasburgmeanCHRel, WheelermeanCHRel, BumgarnermeanCHRel, RyumeanCHRel)
+AllChangeupReleaseSpeed
+
+tableAllChangeup<-data.frame(AllPitcherNames,AllChangeupspins,AllChangeupReleaseSpeed)
+tableAllChangeup
+
+ggplot(data = tableAllChangeup, aes(x=AllPitcherNames, y=AllChangeupspins, fill = AllChangeupReleaseSpeed)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = AllPitcherNames, y = AllChangeupspins, label = AllChangeupspins), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 3) +
+  xlab("Player Name") + 
+  theme(axis.text.x = element_text(angle = 90))+
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Pitchers Avg. Spin Rate and Release Speed for Changeups (2019)") + 
+  coord_cartesian(ylim = c(0, 3200))+
+  geom_abline(slope=0, intercept=1700,  col = "red",lty=2)+
+  geom_abline(slope=0, intercept=1800,  col = "red",lty=2)
+  ggsave("AllChangeups.png")
+
+AllCurveballPitchers=rbind(Williams,Musgrove,Archer,Brault,Keller,Strasburg,Wheeler,Bumgarner,Ryu)
+AllCurveballPitcherNames=c(unique(AllCurveballPitchers$player_name))
+AllCurveballspins=c(WilliamsmeanCUSpin, MusgrovemeanCUSpin,ArchermeanCUSpin,BraultmeanCUSpin, KellermeanCUSpin, StrasburgmeanCUSpin, WheelermeanCUSpin, BumgarnermeanCUSpin, RyumeanCUSpin)
+AllCurveballspins
+
+AllCurveballReleaseSpeed=c(WilliamsmeanCURel, MusgrovemeanCURel, ArchermeanCURel, BraultmeanCURel, KellermeanCURel, StrasburgmeanCURel, WheelermeanCURel, BumgarnermeanCURel, RyumeanCURel)
+AllCurveballReleaseSpeed
+
+tableAllCurveball<-data.frame(AllCurveballPitcherNames,AllCurveballspins,AllCurveballReleaseSpeed)
+tableAllCurveball
+
+ggplot(data = tableAllCurveball, aes(x=AllCurveballPitcherNames, y=AllCurveballspins, fill = AllCurveballReleaseSpeed)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = AllCurveballPitcherNames, y = AllCurveballspins, label = AllCurveballspins), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 3) +
+  xlab("Player Name") + 
+  theme(axis.text.x = element_text(angle = 90))+
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Pitchers Avg. Spin Rate and Release Speed for Curveballs (2019)") + 
+  coord_cartesian(ylim = c(0, 3200))+
+  geom_abline(slope=0, intercept=2500,  col = "red",lty=2)+
+  geom_abline(slope=0, intercept=2600,  col = "red",lty=2)
+  ggsave("AllCurveballs.png")
+
+
+AllTwoSeamPitchers=rbind(Archer,Brault, Cole, Strasburg, Wheeler,Bumgarner, Ryu)
+AllTwoSeamPitcherNames=c(unique(AllTwoSeamPitchers$player_name))
+
+
+AllTwoseamFastballspins=c(ArchermeanFTSpin,BraultmeanFTSpin,ColemeanFTSpin,StrasburgmeanFTSpin,WheelermeanFTSpin, BumgarnermeanFTSpin, RyumeanFTSpin)
+AllTwoseamFastballspins
+
+AllTwoseamFastballReleaseSpeed=c(ArchermeanFTRel, BraultmeanFTRel, ColemeanFTRel, StrasburgmeanFTRel, WheelermeanFTRel, BumgarnermeanFTRel, RyumeanFTRel)
+AllTwoseamFastballReleaseSpeed
+
+tableAllTwoseamFastball<-data.frame(AllTwoSeamPitcherNames,AllTwoseamFastballspins,AllTwoseamFastballReleaseSpeed)
+tableAllTwoseamFastball
+
+ggplot(data = tableAllTwoseamFastball, aes(x=AllTwoSeamPitcherNames, y=AllTwoseamFastballspins, fill = AllTwoseamFastballReleaseSpeed)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = AllTwoSeamPitcherNames, y = AllTwoseamFastballspins, label = AllTwoseamFastballspins), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 4) +
+  xlab("Player Name") + 
+  theme(axis.text.x = element_text(angle = 90))+
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Pitchers Avg. Spin Rate and Release Speed for 2-Seam Fastballs (2019)") + 
+  coord_cartesian(ylim = c(0, 3200))+
+  geom_abline(slope=0, intercept=2150,  col = "red",lty=2)+
+  geom_abline(slope=0, intercept=2200,  col = "red",lty=2)
+  ggsave("AllTwoSeam.png")
+
+
+SinkerPitchers=rbind(Williams, Musgrove)
+PiratesSinkerPitchers=c(unique(SinkerPitchers$player_name))
+
+AllSinkerspins=c(WilliamsmeanSISpin,MusgrovemeanSISpin)
+AllSinkerspins
+
+AllSinkerReleaseSpeed=c(WilliamsmeanSIRel, MusgrovemeanSIRel)
+AllSinkerReleaseSpeed
+
+tableAllSinker<-data.frame(PiratesSinkerPitchers,Sinkerspins,SinkerReleaseSpeed)
+tableAllSinker
+
+ggplot(data = tableAllSinker, aes(x=PiratesSinkerPitchers, y=AllSinkerspins, fill = AllSinkerReleaseSpeed)) + 
+  geom_bar(stat = "identity") + 
+  geom_label(aes(x = PiratesSinkerPitchers,y = AllSinkerspins, label = AllSinkerspins), hjust = .5,  vjust = 0, colour = "black", fill = NA, label.size = NA, family="Helvetica", size = 4) +
+  xlab("Player Name") + 
+  ylab("Spin Rate (RPM)") + 
+  ggtitle("Pitchers Avg. Spin Rate and Release Speed for Sinkers (2019)") + 
+  coord_cartesian(ylim = c(0, 3200))+
+  geom_abline(slope=0, intercept=2100,  col = "red",lty=2)+
+  geom_abline(slope=0, intercept=2150,  col = "red",lty=2)
+  ggsave("AllSinkers.png")
+
+```
+

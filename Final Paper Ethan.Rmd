@@ -1,0 +1,349 @@
+---
+title: "Final Paper"
+author: "STOR 320.02 Group 12"
+date: "April 22, 2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(readr)
+library(maps)
+library(forcats)
+library(rvest)
+library(ggplot2)
+library(kableExtra)
+library(knitr)
+US_Accidents_Dec19 <- read_csv("~/Documents/STOR 320/US_Accidents_Dec19.csv")
+```
+
+# INTRODUCTION
+
+Do you ever get in your car and wonder what factors to avoid in order to decrease the likelihood of a car crash? Living our daily lives, we face a potential risk every time we get behind the wheel in a car. Car accidents are the leading cause of death for people under the age of 54 in the United States. To learn more about these tragic accidents and the surrounding data, we decided to look into a dataset containing car accident data from 2016 to 2019. As our group observed the data, we saw a way to use this data and our knowledge of statistics to form ideas and answer questions that may not be apparent to the average person. 
+
+Our group started this project with the initial idea that we wanted to be able to inform people about what factors are associated with car crashes, and to learn information about car crashes that would be useful to know. With this in mind, we conducted an analysis on several major variables, including population of states, crashes per state, the severity of the crash, various weather conditions, as well as the classification of the street where the car accident was recorded. From our analysis, we developed two major questions that we want to answer: what states are the most dangerous to drive in, and what kinds of variables are important predictors of the severity of a car crash?
+
+The data and the research we have done on car crashes is incredibly useful as advice and caution for daily life. After reading this article, you will leave with a better understanding of what weather conditions and street classifications can lead to more severe car accidents. In addition, you will also know which state is the most dangerous to drive in. Reading this article may protect you from accidents, such as the crashes shown below from this dataset, that our very own group members were a part of. 
+
+
+
+![](Accidents.png)
+
+
+
+
+# DATA
+
+
+The data used in this project represents car crashes that occurred between February 2016 and December 2019 in 49 US states. The data originated from a few data providers, including two APIs- MapQuest and Bing. The APIs provided streaming traffic incident data by transmitting traffic data that was captured by the US Department of Transportation and individual state departments, law enforcement agencies, traffic cameras, and traffic sensors. In this dataset, 74% of the reports were sourced from MapQuest and 24% from Bing. The remaining 1% came from an “other” source. The data was compiled into the US Accidents dataset by researchers at Cornell. 
+ 
+Each observation represents a unique accident, and there are about 3 million accident records in this dataset. In addition to the large sample size, there are also many variables in the dataset. The first important variable is severity, which is represented by a number: 1, 2, 3, or 4. Severity doesn’t measure the intensity of the accident; it measures the accident’s impact on surrounding traffic. For example, a severity of 1 would represent a short delay in traffic and 4 represent a long delay, resulting in lots of traffic like the picture shows below. To use the Severity in our model, we converted it into a binary variable by making 1 and 2 responses into a 0 for "Not Severe" and 3 and 4 responses into a 1 for "Severe".
+
+
+![](Data.png)
+
+We looked at a number of other variables that represented weather conditions at the time of the accident. These conditions include temperature (F), wind chill (F), humidity (%), pressure (in), visibility (mi), wind direction, wind speed (mph), and precipitation (in). We also looked at the state variable, which shows the state where the accident occurred, and the street variable, which shows the street name where the accident occured. To answer the first question, we also used population data from Wikipedia to find the populations for each state. The following table shows our dataset with regards to the variables that we analyzed further.
+
+```{r, echo=FALSE}
+used_variables <- select(US_Accidents_Dec19, contains("Severity"), contains("Street"), contains("City"), contains("State"), contains("Temperature(F)"), contains("Wind_Chill(F)"), contains("Humidity(%)"), contains("Pressure(in)"), contains("Visibility(mi)"), contains("Wind_Direction"), contains("Wind_Speed(mph)"), contains("Precipitation(in)"), contains("Weather_Condition"))
+
+head(used_variables)%>%
+kable()%>%
+kable_styling()
+```
+The following figure shows the number of car accidents in each state. In addition, the figure displays the severity of the accidents in each state by color-coding the different levels of severity (Minimal-1, Minor-2, Major-3, Fatal-4). This figure helps us understand not only how many accidents occured in each state from February 2016 and December 2019, but also the severity of those crashes. 
+
+```{r, echo = FALSE}
+ggplot(US_Accidents_Dec19) +
+  geom_bar(mapping = aes(x=State, fill= factor(Severity,labels=c("Minimal-1", "Minor-2", "Major-3", "Fatal-4"))), na.rm=TRUE) +
+  theme_bw() +
+  ggtitle("US Accidents by State")+
+  labs(fill="Severity")+
+  coord_flip() + 
+  theme(axis.text.y = element_text(size=5))
+
+```
+
+
+# RESULTS
+
+# Question 1
+```{r, include=FALSE}
+State_Accidents = select(US_Accidents_Dec19,State)
+head(State_Accidents)
+State_Accidents2 <- as.data.frame(table(State_Accidents)) %>% rename(State=State_Accidents)
+
+URL.STATE_ABBREV = "https://state.1keydata.com/state-abbreviations.php"
+STATE_ABBREV = URL.STATE_ABBREV %>%
+                read_html() %>%
+                html_table(fill=T) %>%
+                .[[3]] %>%
+                .[-1,]
+head(STATE_ABBREV)
+
+STATE_ABBREV_TOP = STATE_ABBREV[,1:2]
+names(STATE_ABBREV_TOP)=c("state","State")
+STATE_ABBREV_BOT = STATE_ABBREV[,3:4]
+names(STATE_ABBREV_BOT)=c("state","State")
+STATE_ABBREV2=rbind(STATE_ABBREV_TOP,STATE_ABBREV_BOT) %>% arrange(State)
+head(STATE_ABBREV2)
+
+New_Accident5 <- merge(State_Accidents2,STATE_ABBREV2, by="State")
+  
+URL.STATE_POP =
+  "https://simple.wikipedia.org/wiki/List_of_U.S._states_by_population"
+STATE_POP = URL.STATE_POP %>%
+  read_html() %>%
+  html_table(fill=T) %>%
+  .[[1]]
+
+STATE_POP2 = STATE_POP  %>%
+              mutate(`Population estimate, July 1, 2019[2]`=str_replace_all(`Population estimate, July 1, 2019[2]`,",",""))
+
+STATE_POP3 = STATE_POP2 %>%
+  rename(state=State)
+
+FINAL_ACCIDENTS <- merge(New_Accident5,STATE_POP3, by="state")
+
+FINAL_ACCIDENTS2 = FINAL_ACCIDENTS %>%
+  select(state, State, Freq, `Population estimate, July 1, 2019[2]`)
+str(FINAL_ACCIDENTS2)
+
+FINAL_ACCIDENTS3=FINAL_ACCIDENTS2 %>%
+            mutate_at(4:4,as.numeric)
+str(FINAL_ACCIDENTS3)
+
+FINAL_ACCIDENTS3$AccidentsperPerson <- FINAL_ACCIDENTS3$Freq / FINAL_ACCIDENTS3$`Population estimate, July 1, 2019[2]`
+FINAL_ACCIDENTS3$PeopleinMillions <- FINAL_ACCIDENTS3$`Population estimate, July 1, 2019[2]` / 1000000
+
+summary(FINAL_ACCIDENTS3$AccidentsperPerson)
+sd(FINAL_ACCIDENTS3$AccidentsperPerson)
+```
+
+
+After finding this car accident data, one of our group’s initial thoughts was: Which states have the most car accidents? In our preliminary observations, we began to notice that the states with the most car accidents (California, Texas, and Florida) seemed to coincide with the states with the highest populations. We then began to wonder whether states with a high number of car accidents were inherently dangerous or, the high number of crashes was simply a result of large populations. To see which states were in fact more dangerous to drive in, we decided to calculate the number of accidents per person in each state to set populations to scale. In order to do this, we took the estimated 2019 population for each state from Wikipedia and incorporated the new population data into the existing dataset. The first figure on state populations simply shows which US states have the highest populations. The top 4 states are California, Texas, Florida, and New York. 
+
+```{r, echo=FALSE}
+FINAL_ACCIDENTS4 <- data.frame(Count= FINAL_ACCIDENTS3$PeopleinMillions, state = tolower(FINAL_ACCIDENTS3$state))
+map <- map_data("state")
+l <- ggplot(FINAL_ACCIDENTS4, aes(fill = Count))
+l + geom_map(aes(map_id = state), map = map) +
+expand_limits(x = map$long, y = map$lat) +
+ scale_fill_continuous(type="viridis") +
+  ggtitle("   State Population in the US    ") +
+  labs(x="Longitude", y="Latitude",fill= "Number of People in Millions") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), plot.title = element_text(hjust=.5))
+```
+
+Then we created a new variable called AccidentsperPerson by dividing the number of car accidents in each state by the number of people to obtain an accident per capita value. After summarizing the variable, we found that the mean number of accidents per person was .0068 with a standard deviation of .005. The second map shows the results of creating this variable with lighter colors signifying higher values. One state, in particular, stood out in this map. South Carolina had, by far, the highest number of accidents per person with .028 accident per person. This was over 4 standard deviations above the mean and almost twice as high as any other state. Oregon and California followed South Carolina with .017 accidents per person, still well above the mean. North Carolina also had a relatively high value at .013. However, some states such as New York, that was 6th highest in number of accidents, had an accidents per person value right at the average. This tells us that, just because some states have very high accidents numbers, doesn’t mean they are necessarily dangerous. The opposite effect is also true. Some states with very low accident numbers, such as Nebraska, had a very high accident per person value. The goal of creating the AccidentsperPerson variable was an attempt to measure the dangerousness of driving in US states while accounting for state populations. According to this measure, we found that the most dangerous states to drive in are South Carolina, Oregon, California, North Carolina, and Oklahoma. Meanwhile, the safest states were North Dakota, South Dakota, Montana, Arkansas, and Wyoming.
+
+
+```{r, echo=FALSE}
+FINAL_ACCIDENTS4 <- data.frame(Count= FINAL_ACCIDENTS3$AccidentsperPerson, state = tolower(FINAL_ACCIDENTS3$state))
+map <- map_data("state")
+l <- ggplot(FINAL_ACCIDENTS4, aes(fill = Count))
+l + geom_map(aes(map_id = state), map = map) +
+expand_limits(x = map$long, y = map$lat) +
+ scale_fill_continuous(type="viridis") +
+  ggtitle("Car Accidents per Person by State") +
+  labs(x="Longitude", y="Latitude", fill= "Accidents per Person") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), plot.title = element_text(hjust=.5))
+```
+
+# Question 2
+
+Our goal behind our second question was to find whether or not we could build predictive models to predict severity of car crashes. Our first idea was to use weather related variables as the predictors and severity as the response. Looking at the data, we concluded that wind direction was simply missing too many values, being that over 70% of the values were missing, and had too many factors to be useful, therefore it was removed as a whole from the model. The next task was turning severity into a binary variable so that a logistic model could be run on it.
+
+We figured that weather condition would be a very significant variable in predicting accident severity, both through anecdotal evidence of Ethan and Alec's crashes in heavy rain, and from other data points we had seen. The issue was that there were certain weather conditions that were used too infrequently for the data to be split into train and test sets for the model, therefore we decided to remove any conditions that appeared less than 40 times as to remove any doubt in repeat samples that this problem would become apparent. Next the data was split into the train and test sets with a training proportion of 80 percent and a testing propotion of 20%, typical in these types of models. Now we decided to run the models. One logistic regression with the precipitation variable removed, and one with it added. This was considered because of the same problem we discovered with wind direction as precipitation had over 2 million missing values. However, it could still be added to the model, unlike wind direction, because it is a numeric variable. We thought it would be good to try both models.
+
+The first model used more datapoints, but has a much higher AIC of 2518935 and higher null and residual deviance as compared to the second model with less datapoints, but an AIC of 898738 and much lower null and residual deviances. At first appearance, the second model appeared to be the better choice despite many missing values. The next step was using each model to predict values in the test set, and then preform tests to determine fit. The spearman correlation of the first prediction set using the first model to the actual severities was 0.07977992 and the second correlation using the second model was 0.125789 implying that based on this criterion, the model with precipitation included was more accurate in prediction. As another means of testing we decided to transform the predictions into the response(severity) form. The mean of severity(0.329471), or essentially 33% of all accidents were considered severe. So if the predicted probability was greater than the the mean of severe, it was coded as severe(1), and if it was less than the mean of severe it was not severe(0), the histograms beloww show the distribution for each of the two predictions. 
+
+Another idea we had was to use the specific street names associated with each accident location to try and predict the severity. Our first obstacle was deciding which key terms would be used to categorize the different street names, considering the fact that some streets have very unqiue/specfic terms that don't fit a general category. We chose 22 different terms that would apply to a majority of the 2.9 million observations, leaving only 192,862 observations unclaimed, which we categorized as Other. Now, with all 2.9 million observations seperated into 23 seperate categories, we hypothesized that terms within a street name would be a feasible predictor for the severity of the car accident. It makes sense logically that a car accident taking place on a highway, interstate, or state route would create more traffic and affect longer distances of roadway.  Following a similar process as done before with the weather predictors, the data was split 80-20 into train and test sets. The null deviance, residual deviance, and AIC for this model are relatively similar to that of the weather model that excludes Precipitation as a variable. However, these values are much larger than those of the other predictive weather model, which includes the Precipitation variable. From here, it seems that using terms within the street name as a predictor of severity will be more inaccurate than the previous models focusing on weather conditions. After following the same process as before, we found the spearman correlation of the prediction set to the actual severities of the car accidents, and it was 0.3921709. This is significantly higher than the previous models, and at this point, we began to believe street names may actually be a more accurate predictor than weather. Just as beore, we finally predicted the mean severity of this model and compared it to the actual mean severity of the data set. This model gave a mean severity of 0.3724278, which is marginally higher than the actual at 0.33. 
+
+
+The weather model without precipitation had  mean severity was 0.5744502, or about 57.5% of accidents were predicted severe. This is a massive overestimation as compared to the actual 33%. The weather model with precipitation had mean severity was 0.2959133 or about 29.6% of accidents were predicted to be severe, which is only a slight underestimation compared to the actual 33%. Looking across both models. The street name model gave a mean severity of .3724278, or about 37.2% of accidents were predicted as severe. it became clear that the better model choices were the weather model with precipitation and the street name model. These model's predictions had better correlation with the actual test set values, but also had better model criterion, and more closely resembled the proportion of severe accidents. The street name model appeared to be slightly better than the weather model without precipitation which makes sense logically as there is more traffic on certain types of street names whereas traffic doesn't necessarily depend on weather. While not an amazing predictive model by any means, we decided that the superior predictive ability was more important than the issue of using less data, as the model still used over 700,000 datapoints.
+
+```{r, include=FALSE}
+mydat<-US_Accidents_Dec19
+m<-nrow(mydat)
+severe<-rep(0,m)
+severe[mydat$Severity>=3]<-1
+
+wcnames<-names(table(mydat$Weather_Condition))
+which.small<-which(table(mydat$Weather_Condition)<40)
+wcnames.small<-wcnames[which.small]
+WC2<-mydat$Weather_Condition
+is.small<-which(is.element(WC2,wcnames.small))
+levels(WC2) <- c(levels(WC2),"collapsed")
+WC2[is.small]<-"collapsed"
+
+mydat<-data.frame(severe,WC2,mydat)
+meanSevereWhole = mean(mydat$severe)
+
+set.seed(123)
+
+train.prop<-0.8
+which.train<-sample(1:m)[1:floor(m*train.prop)]
+which.test<-(1:m)[-which.train]
+
+xtrain<-mydat[which.train,]
+xtest<-mydat[which.test,]
+
+mylogit<-glm(severe~Temperature.F.+Humidity...+Pressure.in.+
+               Visibility.mi.+
+               Wind_Speed.mph.+
+               WC2,
+             data=xtrain,family="binomial", na.action = na.exclude)
+summary(mylogit)
+
+mylogit2 <- glm(severe~Temperature.F.+Humidity...+Pressure.in.+
+               Visibility.mi.+
+               Wind_Speed.mph.+
+               Precipitation.in.+
+               WC2,
+             data=xtrain,family="binomial", na.action = na.exclude)
+summary(mylogit2)
+
+mypred<-predict.glm(mylogit,newdata=xtest)
+mypred2 <- predict.glm(mylogit2, newdata= xtest)
+
+cor(mypred,xtest$severe,use="pair",method="spearman")
+cor(mypred2,xtest$severe,use="pair",method="spearman")
+```
+
+```{r, include= FALSE}
+mystreetdat<-US_Accidents_Dec19
+
+m2<-nrow(mystreetdat)
+severe<-rep(0,m)
+severe[mystreetdat$Severity>=3]<-1
+
+mystreetdat<-data.frame(severe,mystreetdat)
+
+streetdat = mystreetdat %>%
+  #mutate(DumbNumber = Pressure.in. * Visibility.mi.) %>%
+  mutate(StreetType = 
+          ifelse(grepl("I-", Street, fixed = TRUE), "Interstate", 
+                  ifelse(grepl("Rd", Street, fixed = TRUE), "Road",
+                  ifelse(grepl("State Route", Street, fixed = TRUE), "State Route",
+                  ifelse(grepl("Ave", Street, fixed = TRUE), "Avenue",
+                  ifelse(grepl("Dr", Street, fixed = TRUE), "Drive",
+                  ifelse(grepl("Fwy", Street, fixed = TRUE), "Freeway",
+                  ifelse(grepl("St", Street, fixed = TRUE), "Street",
+                  ifelse(grepl("US", Street, fixed = TRUE), "Highway",
+                  ifelse(grepl("Blvd", Street, fixed = TRUE), "Boulevard",
+                  ifelse(grepl("Ct", Street, fixed = TRUE), "Court",
+                  ifelse(grepl("Pike", Street, fixed = TRUE), "Pike",
+                  ifelse(grepl("Trl", Street, fixed = TRUE), "Trail",
+                  ifelse(grepl("Ln", Street, fixed = TRUE), "Lane",
+                  ifelse(grepl("belt", Street, fixed = TRUE), "Belt",
+                  ifelse(grepl("Hwy", Street, fixed = TRUE), "Highway",
+                  ifelse(grepl("Pkwy", Street, fixed = TRUE), "Parkway",
+                  ifelse(grepl("Brg", Street, fixed = TRUE), "Bridge",
+                  ifelse(grepl("Way", Street, fixed = TRUE), "Way",
+                  ifelse(grepl("Xing", Street, fixed = TRUE), "Crossing",
+                  ifelse(grepl("Highway", Street, fixed = TRUE), "Highway",
+                  ifelse(grepl("Pl", Street, fixed = TRUE), "Place",
+                  ifelse(grepl("Ter", Street, fixed = TRUE), "Terrace",
+                  ifelse(grepl("Cir", Street, fixed = TRUE), "Circle",
+                  ifelse(grepl("CA", Street, fixed = TRUE), "State Route",
+                  ifelse(grepl("OH", Street, fixed = TRUE), "State Route",
+                  ifelse(grepl("WV", Street, fixed = TRUE), "State Route",
+                  ifelse(grepl("Bridge", Street, fixed = TRUE), "Bridge",
+                  ifelse(grepl("Road", Street, fixed = TRUE), "Road",
+                  ifelse(grepl("Expy", Street, fixed = TRUE), "Expressway", "Other"
+                  ))))))))))))))))))))))))))))
+                 )
+         ) 
+
+newnewnew = streetdat %>% 
+  mutate(Severity_Rating = ifelse(severe == 0, "Not Severe", "Severe"))
+
+options(scipen=1000000)
+ggplot(data = newnewnew, mapping = aes(fill = Severity_Rating)) + geom_bar(mapping = aes(x = forcats::fct_infreq(StreetType))) + coord_flip() + labs(x = "Street Type")
+
+set.seed(123)
+
+train.prop<-0.8
+which.train<-sample(1:m)[1:floor(m*train.prop)]
+which.test<-(1:m)[-which.train]
+
+xtrain2<-streetdat[which.train,]
+xtest2<-streetdat[which.test,]
+
+mystreetlogit<-glm(severe~StreetType,
+             data=xtrain2,family="binomial", na.action = na.exclude)
+summary(mystreetlogit)
+
+mystreetpred<-predict.glm(mystreetlogit,newdata=xtest2)
+
+cor(mystreetpred,xtest2$severe,use="pair",method="spearman")
+
+streetpredictionBinary <- ifelse(predict.glm(mystreetlogit, newdata = xtest2, type="response")>meanSevereWhole, 1, 0)
+hist(streetpredictionBinary, main = "Frequency of Prediction from streetlogit")
+mean(streetpredictionBinary, na.rm = TRUE)
+```
+
+
+
+```{r, echo=FALSE}
+ggplot(mydat) +
+  geom_bar(mapping = aes(x=severe, fill= factor(severe,labels=c("Not Severe", "Severe"))), na.rm=TRUE, width =.5) +
+  theme_bw() +
+  ggtitle("Frequency of Actual")+
+  labs(fill="severe")
+
+predictionBinary <- ifelse(predict.glm(mylogit, newdata = xtest, type="response")>meanSevereWhole, 1, 0)
+
+PredictBinary <- as.data.frame(predictionBinary)
+
+options(scipen=1000000)
+ggplot(PredictBinary) +
+  geom_bar(mapping = aes(x=predictionBinary, fill= factor(predictionBinary,labels=c("Not Severe", "Severe"))), na.rm=TRUE, width = .5) +
+  theme_bw() +
+  ggtitle("Frequency of Prediction from Weather Model without Precipitation")+
+  labs(fill="predictionBinary")
+
+predictionBinary2 <- ifelse(predict.glm(mylogit2, newdata = xtest, type="response")>meanSevereWhole, 1, 0)
+
+  
+PredictBinary2 <- as.data.frame(predictionBinary2)
+
+
+options(scipen=1000000)
+ggplot(PredictBinary2) +
+  geom_bar(mapping = aes(x=predictionBinary2, fill= factor(predictionBinary2,labels=c("Not Severe", "Severe"))), na.rm=TRUE, width =.5) +
+  theme_bw() +
+  ggtitle("Frequency of Prediction from Weather Model with Precipitation")+
+  labs(fill="predictionBinary2") 
+
+streetpredictionBinary <- ifelse(predict.glm(mystreetlogit, newdata = xtest2, type="response")>meanSevereWhole, 1, 0)
+
+streetPredictBinary <- as.data.frame(streetpredictionBinary)
+
+options(scipen=1000000)
+ggplot(streetPredictBinary) + geom_bar(mapping = aes(x = streetpredictionBinary, fill = factor(streetpredictionBinary, labels = c("Not Severe", "Severe"))), na.rm = TRUE, width = 0.5) + theme_bw() + ggtitle("Frequency of Prediction from Street Name Model") + labs(fill = "streetpredictionBinary")
+
+```
+
+# CONCLUSION
+
+In conclusion, we wanted to answer the following questions: which states are the most dangerous to drive in, and what variables are important predictors of the severity of a car crash. After seeing these results, we hope it was clear which state had the highest ratio of car crashes to people per state, and what variables are the most important predictors of the severity of a car crash. 
+
+The results from the first question (most dangerous state) showed that South Carolina had the most accidents per person from February 2016 to December 2019. We learned by looking at New York, that just because a state has a high number of accidents, doesn’t mean they are dangerous (they just also have a high population). The most dangerous states to drive in are South Carolina, Oregon, California, North Carolina, and Oklahoma. The safest states are North Dakota, South Dakota, Montana, Arkansas, and Wyoming. The results from our second question showed that street names were a better predictor of severity than weather conditions were. This was because the amount of traffic was more divided by the street names than by the weather conditions.
+
+Continuing to work on this data and analyze different predictors would lead to highly valuable information that not just your everyday driver could use, but also those researching automated driving systems. By being able to analyze different trends in the data, this information would benefit those working to provide a safer driving experience for everyone. One major improvement that would greatly help our research would be to have better data that is not missing so many values. One issue that we ran into while analyzing our data was that there were many missing values for certain variables. For example, precipitation had a significant amount of data that was not recorded. Although it is possible to sample values that have all the variables included, this leaves us with less data then we should have. Having a more complete data set would be highly beneficial for continued work. Another improvement would be to include different types of variables that can be predicted. An important variable within safety is how many people were injured from the accident, or even died. This information is highly valuable for helping model what possible factors can lead to severe injury or even death in a car accident. If we were to conduct further research, a good starting point would be to begin looking at the different times that accidents happen. We would then start creating models based off of year, month, or even the hour at which these accidents were recorded.
+
+Our findings could save lives. If people knew what conditions were most favorable for car accidents, they may be less likely to drive while these conditions are present. This change could lead to less car accidents in the US as a result. People may also feel more comfortable behind the wheel if they know they are driving while conditions are less favorable for an accident. In addition, our predictions could be useful to parents of new drivers. If their kids are still learning to drive, parents could be aware of the conditions associated with more car accidents and tell their new drivers to avoid driving in these conditions while still learning how to drive. It is important to us that our research could potentially save lives. Regardless of whether or not what we find is significant, anything we can do to help make the lives of those around us safer even by a little is important to us and we hope it is important to you as well. 
+
+
+
+
+
+
+

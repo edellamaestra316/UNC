@@ -1,0 +1,35 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+library(readxl)
+setwd("~/Documents/ECON 485")
+Hockey_Data_Project <- read_excel("Hockey Data Project.xlsx")
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+
+ggplot() +
+  geom_point(data=Hockey_Data_Project, mapping=aes(x = `Number of Talents`, y = `Points Percentage`)) +
+  ggtitle("Effect of Talent on Points Percentage") +
+  theme_bw()
+```
+
+```{r}
+Model=lm(`Points Percentage`~`Number of Talents`, data=Hockey_Data_Project)
+summary(Model)
+
+plot(`Points Percentage`~`Number of Talents`, data=Hockey_Data_Project)
+abline(Model)
+```
+
